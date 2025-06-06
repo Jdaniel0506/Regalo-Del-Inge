@@ -1,0 +1,169 @@
+#include <iostream>
+using namespace std;
+
+// Clase Nodo
+class Nodo {
+public:
+    int dato;
+    Nodo* siguiente;
+
+    Nodo(int d) {
+        dato = d;
+        siguiente = nullptr;
+    }
+};
+
+// Clase base Lista
+class Lista {
+protected:
+    Nodo* cabeza;
+
+public:
+    Lista() {
+        cabeza = nullptr;
+    }
+
+    virtual void push(int dato) = 0;
+    virtual int pop() = 0;
+    virtual void mostrar() = 0;
+
+    bool vacia() {
+        return cabeza == nullptr;
+    }
+
+    int top() {
+        if (cabeza) return cabeza->dato;
+        return -1;
+    }
+
+    int contarNodos() {
+        int contador = 0;
+        Nodo* actual = cabeza;
+        while (actual) {
+            contador++;
+            actual = actual->siguiente;
+        }
+        return contador;
+    }
+};
+
+// Clase Pila
+class Pila : public Lista {
+public:
+    void push(int dato) override {
+        Nodo* nuevo = new Nodo(dato);
+        nuevo->siguiente = cabeza;
+        cabeza = nuevo;
+    }
+
+    int pop() override {
+        if (vacia()) return -1;
+        Nodo* temp = cabeza;
+        int valor = cabeza->dato;
+        cabeza = cabeza->siguiente;
+        delete temp;
+        return valor;
+    }
+
+    void mostrar() override {
+        Nodo* actual = cabeza;
+        while (actual) {
+            cout << actual->dato << " ";
+            actual = actual->siguiente;
+        }
+        cout << endl;
+    }
+};
+
+// Clase Juego interactivo de Hanoi
+class JuegoHanoi {
+private:
+    Pila torreA, torreB, torreC;
+    int numDiscos;
+
+public:
+    JuegoHanoi(int n) {
+        numDiscos = n;
+        for (int i = n; i >= 1; i--) {
+            torreA.push(i);
+        }
+    }
+
+    void mostrarTorres() {
+        cout << "\nTorre A: "; torreA.mostrar();
+        cout << "Torre B: "; torreB.mostrar();
+        cout << "Torre C: "; torreC.mostrar();
+        cout << "--------------------------\n";
+    }
+
+    bool mover(char origen, char destino) {
+        Pila* from = obtenerTorre(origen);
+        Pila* to = obtenerTorre(destino);
+
+        if (!from || !to) {
+            cout << "Torre invalida.\n";
+            return false;
+        }
+
+        if (from->vacia()) {
+            cout << "La torre está vacia.\n";
+            return false;
+        }
+
+        int discoOrigen = from->top();
+        int discoDestino = to->top();
+
+        if (!to->vacia() && discoOrigen > discoDestino) {
+            cout << "No puedes poner un disco más grande sobre uno mas chico.\n";
+            return false;
+        }
+
+        to->push(from->pop());
+        cout << "Moviste disco " << discoOrigen << " de " << origen << " a " << destino << ".\n";
+        return true;
+    }
+
+    bool juegoGanado() {
+        return torreC.contarNodos() == numDiscos;
+    }
+
+    void jugar() {
+        mostrarTorres();
+        while (!juegoGanado()) {
+            char origen, destino;
+            cout << "Mover de (A/B/C): ";
+            cin >> origen;
+            cout << "Mover a (A/B/C): ";
+            cin >> destino;
+
+            mover(toupper(origen), toupper(destino));
+            mostrarTorres();
+        }
+        cout << "¡Felicidades! Has completado el juego.\n";
+    }
+
+    Pila* obtenerTorre(char id) {
+        switch (toupper(id)) {
+            case 'A': return &torreA;
+            case 'B': return &torreB;
+            case 'C': return &torreC;
+            default: return nullptr;
+        }
+    }
+};
+
+int main() {
+    int n;
+    cout << "Ingrese el numero de discos: ";
+    cin >> n;
+
+    if (n <= 0) {
+        cout << "Numero invalido de discos.\n";
+        return 0;
+    }
+
+    JuegoHanoi juego(n);
+    juego.jugar();
+
+    return 0;
+}
