@@ -1,11 +1,12 @@
 #include <iostream>
 using namespace std;
 
-// Clase Nodo
+// ---------------------- Clase Nodo ----------------------
+// Representa un elemento de la lista (o pila).
 class Nodo {
 public:
-    int dato;
-    Nodo* siguiente;
+    int dato;             // Valor del nodo (disco)
+    Nodo* siguiente;      // Puntero al siguiente nodo
 
     Nodo(int d) {
         dato = d;
@@ -13,29 +14,34 @@ public:
     }
 };
 
-// Clase base Lista
+// ---------------------- Clase base Lista ----------------------
+// Clase abstracta que representa una estructura de lista enlazada.
 class Lista {
 protected:
-    Nodo* cabeza;
+    Nodo* cabeza;         // Puntero al primer nodo
 
 public:
     Lista() {
         cabeza = nullptr;
     }
 
-    virtual void push(int dato) = 0;
-    virtual int pop() = 0;
-    virtual void mostrar() = 0;
+    // Métodos virtuales puros para que las subclases los implementen
+    virtual void push(int dato) = 0;      // Insertar elemento
+    virtual int pop() = 0;                // Eliminar y devolver el tope
+    virtual void mostrar() = 0;           // Mostrar todos los elementos
 
+    // Verifica si la lista está vacía
     bool vacia() {
         return cabeza == nullptr;
     }
 
+    // Devuelve el valor del tope (sin eliminarlo)
     int top() {
         if (cabeza) return cabeza->dato;
-        return -1;
+        return -1; // Si está vacía, devuelve -1
     }
 
+    // Cuenta la cantidad de nodos en la lista
     int contarNodos() {
         int contador = 0;
         Nodo* actual = cabeza;
@@ -47,15 +53,18 @@ public:
     }
 };
 
-// Clase Pila
+// ---------------------- Clase Pila (hereda de Lista) ----------------------
+// Implementa una pila (LIFO) usando la lista enlazada
 class Pila : public Lista {
 public:
+    // Inserta un nuevo elemento en la parte superior de la pila
     void push(int dato) override {
         Nodo* nuevo = new Nodo(dato);
         nuevo->siguiente = cabeza;
         cabeza = nuevo;
     }
 
+    // Elimina y devuelve el elemento del tope
     int pop() override {
         if (vacia()) return -1;
         Nodo* temp = cabeza;
@@ -65,6 +74,7 @@ public:
         return valor;
     }
 
+    // Muestra todos los elementos de la pila
     void mostrar() override {
         Nodo* actual = cabeza;
         while (actual) {
@@ -75,13 +85,15 @@ public:
     }
 };
 
-// Clase Juego interactivo de Hanoi
+// ---------------------- Clase JuegoHanoi ----------------------
+// Implementa la lógica del juego Torres de Hanoi usando pilas
 class JuegoHanoi {
 private:
-    Pila torreA, torreB, torreC;
-    int numDiscos;
+    Pila torreA, torreB, torreC; // Tres torres como pilas
+    int numDiscos;               // Número total de discos
 
 public:
+    // Constructor: inicializa la torre A con todos los discos
     JuegoHanoi(int n) {
         numDiscos = n;
         for (int i = n; i >= 1; i--) {
@@ -89,6 +101,7 @@ public:
         }
     }
 
+    // Muestra el estado actual de las tres torres
     void mostrarTorres() {
         cout << "\nTorre A: "; torreA.mostrar();
         cout << "Torre B: "; torreB.mostrar();
@@ -96,6 +109,7 @@ public:
         cout << "--------------------------\n";
     }
 
+    // Realiza un movimiento entre dos torres
     bool mover(char origen, char destino) {
         Pila* from = obtenerTorre(origen);
         Pila* to = obtenerTorre(destino);
@@ -113,20 +127,24 @@ public:
         int discoOrigen = from->top();
         int discoDestino = to->top();
 
+        // Verifica la regla del juego: no poner un disco más grande sobre uno más pequeño
         if (!to->vacia() && discoOrigen > discoDestino) {
             cout << "No puedes poner un disco más grande sobre uno mas chico.\n";
             return false;
         }
 
+        // Mueve el disco
         to->push(from->pop());
         cout << "Moviste disco " << discoOrigen << " de " << origen << " a " << destino << ".\n";
         return true;
     }
 
+    // Verifica si todos los discos están en la torre C
     bool juegoGanado() {
         return torreC.contarNodos() == numDiscos;
     }
 
+    // Método principal del juego, permite al jugador mover discos
     void jugar() {
         mostrarTorres();
         while (!juegoGanado()) {
@@ -142,6 +160,7 @@ public:
         cout << "¡Felicidades! Has completado el juego.\n";
     }
 
+    // Retorna la torre correspondiente al caracter recibido
     Pila* obtenerTorre(char id) {
         switch (toupper(id)) {
             case 'A': return &torreA;
@@ -152,6 +171,7 @@ public:
     }
 };
 
+// ---------------------- Función principal ----------------------
 int main() {
     int n;
     cout << "Ingrese el numero de discos: ";
@@ -162,8 +182,8 @@ int main() {
         return 0;
     }
 
-    JuegoHanoi juego(n);
-    juego.jugar();
+    JuegoHanoi juego(n);  // Se crea el juego con n discos
+    juego.jugar();        // Se inicia el juego
 
     return 0;
 }
